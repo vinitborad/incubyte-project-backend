@@ -11,6 +11,7 @@ export const addSweetController = async (req: Request, res: Response) => {
   }
 };
 
+
 export const viewSweetsController = async (req: Request, res: Response) => {
   try {
     const sweets = await SweetModel.find({});
@@ -19,6 +20,7 @@ export const viewSweetsController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error fetching sweets' });
   }
 };
+
 
 export const deleteSweetController = async (req: Request, res: Response) => {
   try {
@@ -34,6 +36,7 @@ export const deleteSweetController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error deleting sweet' });
   }
 };
+
 
 export const searchSweetsController = async (req: Request, res: Response) => {
   try {
@@ -63,5 +66,30 @@ export const searchSweetsController = async (req: Request, res: Response) => {
     res.status(200).send(sweets);
   } catch (error) {
     res.status(500).send({ message: 'Error searching sweets' });
+  }
+};
+
+
+export const purchaseSweetController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { quantity: purchaseQuantity } = req.body;
+
+    const sweet = await SweetModel.findById(id);
+
+    if (!sweet) {
+      return res.status(404).send({ message: 'Sweet not found' });
+    }
+
+    if (sweet.quantity < purchaseQuantity) {
+      return res.status(400).send({ message: 'Insufficient stock' });
+    }
+
+    sweet.quantity -= purchaseQuantity;
+    await sweet.save();
+
+    res.status(200).send({ message: 'Purchase successful' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error processing purchase' });
   }
 };
