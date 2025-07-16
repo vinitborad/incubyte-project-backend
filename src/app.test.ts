@@ -286,3 +286,25 @@ describe('POST /restock/:id', () => {
     expect(response.body.message).toBe('A positive restock quantity is required');
   });
 });
+
+
+describe('GET /categories', () => {
+  it('should return an array of unique sweet categories', async () => {
+    // Arrange: Create sweets with duplicate categories
+    await SweetModel.create([
+      { name: 'Chocolate Cake', category: 'Cake', price: 350, quantity: 10 },
+      { name: 'Vanilla Muffin', category: 'Muffin', price: 150, quantity: 20 },
+      { name: 'Strawberry Cake', category: 'Cake', price: 400, quantity: 5 },
+    ]);
+
+    // Act: Make the API call
+    const response = await request(app).get('/categories').expect(200);
+
+    // Assert: Check that the response is a sorted array of unique categories
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBe(2);
+    // Sort the result to have a predictable order for assertion
+    const sortedCategories = response.body.sort();
+    expect(sortedCategories).toEqual(['Cake', 'Muffin']);
+  });
+});
