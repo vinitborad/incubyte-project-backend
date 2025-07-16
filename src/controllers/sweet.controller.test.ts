@@ -14,7 +14,7 @@ const getMockRes = () => {
   return res;
 };
 
-// --- Tests for addSweetController ---
+
 describe('addSweetController', () => {
   // Clear mock history before each test
   beforeEach(() => {
@@ -71,5 +71,63 @@ describe('addSweetController', () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ message: 'A sweet with this name already exists' });
+  });
+});
+
+
+describe('viewSweetsController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return 200 and an array of sweets if they exist', async () => {
+    // Arrange
+    const mockSweets = [
+      { name: 'Kaju Katli', category: 'Nut-Based', price: 50, quantity: 20 },
+      { name: 'Gajar Halwa', category: 'Vegetable-Based', price: 30, quantity: 15 },
+    ];
+    (SweetModel.find as jest.Mock).mockResolvedValue(mockSweets);
+
+    const req = {} as Request;
+    const res = getMockRes(); // Assuming getMockRes helper is in the file
+
+    // Act
+    await viewSweetsController(req, res);
+
+    // Assert
+    expect(SweetModel.find).toHaveBeenCalledWith({});
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(mockSweets);
+  });
+
+  it('should return 200 and an empty array if no sweets exist', async () => {
+    // Arrange
+    (SweetModel.find as jest.Mock).mockResolvedValue([]); // Mock an empty array
+
+    const req = {} as Request;
+    const res = getMockRes();
+
+    // Act
+    await viewSweetsController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith([]);
+  });
+
+  it('should return 500 if there is a database error', async () => {
+    // Arrange
+    const dbError = new Error('Database connection failed');
+    (SweetModel.find as jest.Mock).mockRejectedValue(dbError); // Mock a failure
+
+    const req = {} as Request;
+    const res = getMockRes();
+
+    // Act
+    await viewSweetsController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error fetching sweets' });
   });
 });
