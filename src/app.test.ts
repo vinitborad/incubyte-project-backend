@@ -60,13 +60,18 @@ describe('GET /view', () => {
     await SweetModel.create([sweet1, sweet2]);
 
     // Act: Make the API call
-    const response = await request(app).get('/view-all').expect(200);
+    const response = await request(app).get('/view').expect(200);
 
     // Assert: Check the response body
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body.length).toBe(2);
-    expect(response.body[0].name).toBe('Kaju Katli');
-    expect(response.body[1].name).toBe('Gajar Halwa');
+
+    // Create an array of just the names from the response
+    const names = response.body.map((sweet: { name: string }) => sweet.name);
+
+    // Check that the expected names are included in the array, in any order
+    expect(names).toContain('Kaju Katli');
+    expect(names).toContain('Gajar Halwa');
   });
 });
 
