@@ -139,3 +139,13 @@ export const restockSweetController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error processing restock' });
   }
 };
+
+export const getCategoriesController = async (req: Request, res: Response) => {
+  try {
+    // Use .distinct() to get an array of unique values for the 'category' field
+    const categories = await SweetModel.distinct('category');
+    res.status(200).send(categories);
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching categories' });
+  }
+};

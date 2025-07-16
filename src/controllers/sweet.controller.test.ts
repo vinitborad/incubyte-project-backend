@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
   addSweetController,
   deleteSweetController,
+  getCategoriesController,
   purchaseSweetController,
   restockSweetController,
   searchSweetsController,
@@ -407,5 +408,29 @@ describe('restockSweetController', () => {
     // Assert
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
+  });
+});
+
+
+describe('getCategoriesController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call SweetModel.distinct and return a list of categories', async () => {
+    // Arrange
+    const mockCategories = ['Cake', 'Muffin', 'Pastry'];
+    (SweetModel.distinct as jest.Mock).mockResolvedValue(mockCategories);
+
+    const req = {} as Request;
+    const res = getMockRes();
+
+    // Act
+    await getCategoriesController(req, res);
+
+    // Assert
+    expect(SweetModel.distinct).toHaveBeenCalledWith('category');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(mockCategories);
   });
 });
