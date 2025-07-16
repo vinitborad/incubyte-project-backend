@@ -3,6 +3,7 @@ import {
   addSweetController,
   deleteSweetController,
   purchaseSweetController,
+  restockSweetController,
   searchSweetsController,
   viewSweetsController
 } from './sweet.controller';
@@ -341,6 +342,67 @@ describe('purchaseSweetController', () => {
 
     // Act
     await purchaseSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
+  });
+});
+
+
+describe('restockSweetController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should increase quantity and return 200 on a valid restock', async () => {
+    // Arrange
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 50 },
+    } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.findByIdAndUpdate as jest.Mock).mockResolvedValue({ _id: 'some-id', quantity: 100 });
+
+    // Act
+    await restockSweetController(req, res);
+
+    // Assert
+    expect(SweetModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      'some-id',
+      { $inc: { quantity: 50 } },
+      { new: true }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should return 400 if restock quantity is missing or not positive', async () => {
+    // Arrange
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: -10 }, // Invalid quantity
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await restockSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive restock quantity is required' });
+  });
+
+  it('should return 404 if sweet to restock is not found', async () => {
+    // Arrange
+    (SweetModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+    const req = {
+      params: { id: 'not-found-id' },
+      body: { quantity: 10 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await restockSweetController(req, res);
 
     // Assert
     expect(res.status).toHaveBeenCalledWith(404);

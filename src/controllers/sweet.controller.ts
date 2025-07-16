@@ -119,18 +119,22 @@ export const restockSweetController = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { quantity: restockQuantity } = req.body;
 
-    // Find the sweet and atomically increment its quantity
+    // New Validation: Check if quantity is provided and is a positive number
+    if (!restockQuantity || restockQuantity <= 0) {
+      return res.status(400).send({ message: 'A positive restock quantity is required' });
+    }
+
     const updatedSweet = await SweetModel.findByIdAndUpdate(
       id,
       { $inc: { quantity: restockQuantity } },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedSweet) {
       return res.status(404).send({ message: 'Sweet not found' });
     }
 
-    res.status(200).send({ message: 'Restock successful' });
+    res.status(200).send({ message: 'Restock successful', sweet: updatedSweet });
   } catch (error) {
     res.status(500).send({ message: 'Error processing restock' });
   }

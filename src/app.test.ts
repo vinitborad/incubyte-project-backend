@@ -257,4 +257,32 @@ describe('POST /restock/:id', () => {
     const updatedSweet = await SweetModel.findById(sweetId);
     expect(updatedSweet?.quantity).toBe(60); // 10 + 50
   });
+
+  it('should return 400 if the restock quantity is not provided', async () => {
+    // Arrange
+    const sweet = await SweetModel.create({ name: 'Test', category: 'Test', price: 1, quantity: 1 });
+    const sweetId = sweet._id.toString();
+
+    // Act & Assert
+    const response = await request(app)
+      .post(`/restock/${sweetId}`)
+      .send({}) // Sending empty body
+      .expect(400);
+
+    expect(response.body.message).toBe('A positive restock quantity is required');
+  });
+
+  it('should return 400 if the restock quantity is not a positive number', async () => {
+    // Arrange
+    const sweet = await SweetModel.create({ name: 'Test', category: 'Test', price: 1, quantity: 1 });
+    const sweetId = sweet._id.toString();
+
+    // Act & Assert
+    const response = await request(app)
+      .post(`/restock/${sweetId}`)
+      .send({ quantity: -5 }) // Sending non-positive number
+      .expect(400);
+
+    expect(response.body.message).toBe('A positive restock quantity is required');
+  });
 });
