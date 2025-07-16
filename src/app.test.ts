@@ -104,4 +104,23 @@ describe('GET /search', () => {
     expect(response.body[0].category).toBe('Cake');
     expect(response.body[1].category).toBe('Cake');
   });
+
+  it('should return sweets within a given price range', async () => {
+    // Arrange
+    await SweetModel.create([
+      { name: 'Ladoo', category: 'Gram Flour', price: 10, quantity: 50 },
+      { name: 'Barfi', category: 'Milk-Based', price: 25, quantity: 30 },
+      { name: 'Mysore Pak', category: 'Gram Flour', price: 40, quantity: 20 },
+    ]);
+
+    // Act
+    const response = await request(app)
+      .get('/search?minPrice=20&maxPrice=45')
+      .expect(200);
+
+    // Assert
+    expect(response.body.length).toBe(2);
+    expect(response.body[0].name).toBe('Barfi');
+    expect(response.body[1].name).toBe('Mysore Pak');
+  });
 });
