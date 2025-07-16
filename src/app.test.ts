@@ -183,3 +183,30 @@ describe('POST /purchase/:id', () => {
     expect(sweetFromDb?.quantity).toBe(5);
   });
 });
+
+
+describe('POST /restock/:id', () => {
+  it('should increase the quantity of a sweet after a restock', async () => {
+    // Arrange: Create a sweet with an initial quantity
+    const sweet = await SweetModel.create({
+      name: 'Sohan Papdi',
+      category: 'Flaky',
+      price: 35,
+      quantity: 10,
+    });
+    const sweetId = sweet._id.toString();
+    const restockQuantity = 50;
+
+    // Act: Make the API call to restock the sweet
+    const response = await request(app)
+      .post(`/restock/${sweetId}`)
+      .send({ quantity: restockQuantity })
+      .expect(200);
+
+    // Assert: Check the response and the database
+    expect(response.body.message).toBe('Restock successful');
+
+    const updatedSweet = await SweetModel.findById(sweetId);
+    expect(updatedSweet?.quantity).toBe(60); // 10 + 50
+  });
+});
