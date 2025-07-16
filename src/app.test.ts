@@ -87,4 +87,21 @@ describe('GET /search', () => {
     expect(response.body[0].name).toContain('Chocolate');
     expect(response.body[1].name).toContain('Chocolate');
   });
+
+  it('should return sweets matching a category query', async () => {
+    // Arrange
+    await SweetModel.create([
+      { name: 'Chocolate Cake', category: 'Cake', price: 350, quantity: 10 },
+      { name: 'Vanilla Muffin', category: 'Muffin', price: 150, quantity: 20 },
+      { name: 'Strawberry Cake', category: 'Cake', price: 400, quantity: 5 },
+    ]);
+
+    // Act
+    const response = await request(app).get('/search?category=Cake').expect(200);
+
+    // Assert
+    expect(response.body.length).toBe(2);
+    expect(response.body[0].category).toBe('Cake');
+    expect(response.body[1].category).toBe('Cake');
+  });
 });
