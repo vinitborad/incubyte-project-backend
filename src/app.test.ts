@@ -202,6 +202,34 @@ describe('POST /purchase/:id', () => {
     const sweetFromDb = await SweetModel.findById(sweetId);
     expect(sweetFromDb?.quantity).toBe(5);
   });
+
+  it('should return 400 if the purchase quantity is not provided', async () => {
+    // Arrange: Create a sweet
+    const sweet = await SweetModel.create({ name: 'Test Sweet', category: 'Test', price: 10, quantity: 10 });
+    const sweetId = sweet._id.toString();
+
+    // Act & Assert: Make the API call with an empty body
+    const response = await request(app)
+      .post(`/purchase/${sweetId}`)
+      .send({}) // Sending an empty body
+      .expect(400);
+
+    expect(response.body.message).toBe('A positive purchase quantity is required');
+  });
+
+  it('should return 400 if the purchase quantity is not a positive number', async () => {
+    // Arrange
+    const sweet = await SweetModel.create({ name: 'Test Sweet', category: 'Test', price: 10, quantity: 10 });
+    const sweetId = sweet._id.toString();
+
+    // Act & Assert: Make the API call with a zero quantity
+    const response = await request(app)
+      .post(`/purchase/${sweetId}`)
+      .send({ quantity: 0 }) // Sending a non-positive number
+      .expect(400);
+
+    expect(response.body.message).toBe('A positive purchase quantity is required');
+  });
 });
 
 
