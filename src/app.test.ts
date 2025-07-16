@@ -68,3 +68,23 @@ describe('DELETE /delete/:id', () => {
     expect(sweetFromDb).toBeNull();
   });
 });
+
+describe('GET /search', () => {
+  it('should return sweets matching a name query', async () => {
+    // Arrange: Create sweets to search through
+    await SweetModel.create([
+      { name: 'Chocolate Cake', category: 'Cake', price: 350, quantity: 10 },
+      { name: 'Chocolate Brownie', category: 'Pastry', price: 180, quantity: 15 },
+      { name: 'Vanilla Muffin', category: 'Muffin', price: 150, quantity: 20 },
+    ]);
+
+    // Act: Make the API call to search for "Chocolate"
+    const response = await request(app).get('/search?name=Chocolate').expect(200);
+
+    // Assert: Check that only the chocolate sweets are returned
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBe(2);
+    expect(response.body[0].name).toContain('Chocolate');
+    expect(response.body[1].name).toContain('Chocolate');
+  });
+});
