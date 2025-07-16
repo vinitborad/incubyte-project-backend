@@ -31,6 +31,7 @@ describe('POST /add', () => {
   });
 });
 
+
 describe('GET /view', () => {
   it('should return an array of all sweets in the database', async () => {
     // Arrange: Create some sweets in the test database first
@@ -48,6 +49,7 @@ describe('GET /view', () => {
     expect(response.body[1].name).toBe('Gajar Halwa');
   });
 });
+
 
 describe('DELETE /delete/:id', () => {
   it('should delete a sweet from the database', async () => {
@@ -68,6 +70,7 @@ describe('DELETE /delete/:id', () => {
     expect(sweetFromDb).toBeNull();
   });
 });
+
 
 describe('GET /search', () => {
   it('should return sweets matching a name query', async () => {
@@ -128,5 +131,31 @@ describe('GET /search', () => {
     expect(names).toContain('Barfi');
     expect(names).toContain('Mysore Pak');
   });
+});
 
+
+describe('POST /purchase/:id', () => {
+  it('should decrease the quantity of a sweet after a purchase', async () => {
+    // Arrange: Create a sweet with an initial quantity
+    const sweet = await SweetModel.create({
+      name: 'Motichoor Ladoo',
+      category: 'Gram Flour',
+      price: 15,
+      quantity: 100,
+    });
+    const sweetId = sweet._id.toString();
+    const purchaseQuantity = 10;
+
+    // Act: Make the API call to purchase the sweet
+    const response = await request(app)
+      .post(`/purchase/${sweetId}`)
+      .send({ quantity: purchaseQuantity })
+      .expect(200);
+
+    // Assert: Check the response and the database
+    expect(response.body.message).toBe('Purchase successful');
+
+    const updatedSweet = await SweetModel.findById(sweetId);
+    expect(updatedSweet?.quantity).toBe(90); // 100 - 10
+  });
 });
