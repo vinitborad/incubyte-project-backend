@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addSweetController, viewSweetsController } from './sweet.controller';
+import { addSweetController, deleteSweetController, viewSweetsController } from './sweet.controller';
 import { SweetModel } from '../models/sweet.model';
 
 // Mock the entire SweetModel module
@@ -129,5 +129,65 @@ describe('viewSweetsController', () => {
     // Assert
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({ message: 'Error fetching sweets' });
+  });
+});
+
+
+describe('deleteSweetController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should delete a sweet and return 200 if the sweet exists', async () => {
+    // Arrange
+    const sweetId = 'some-valid-id';
+    const req = { params: { id: sweetId } } as unknown as Request;
+    const res = getMockRes();
+
+    // Mock findByIdAndDelete to return a deleted document (simulating success)
+    (SweetModel.findByIdAndDelete as jest.Mock).mockResolvedValue({ _id: sweetId });
+
+    // Act
+    await deleteSweetController(req, res);
+
+    // Assert
+    expect(SweetModel.findByIdAndDelete).toHaveBeenCalledWith(sweetId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Sweet deleted successfully' });
+  });
+
+  it('should return 404 if the sweet to delete does not exist', async () => {
+    // Arrange
+    const sweetId = 'non-existent-id';
+    const req = { params: { id: sweetId } } as unknown as Request;
+    const res = getMockRes();
+
+    // Mock findByIdAndDelete to return null (simulating not found)
+    (SweetModel.findByIdAndDelete as jest.Mock).mockResolvedValue(null);
+
+    // Act
+    await deleteSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
+  });
+
+  it('should return 500 if there is a database error', async () => {
+    // Arrange
+    const sweetId = 'some-id';
+    const req = { params: { id: sweetId } } as unknown as Request;
+    const res = getMockRes();
+
+    // Mock findByIdAndDelete to throw an error
+    const dbError = new Error('DB Error');
+    (SweetModel.findByIdAndDelete as jest.Mock).mockRejectedValue(dbError);
+
+    // Act
+    await deleteSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error deleting sweet' });
   });
 });
