@@ -10,3 +10,12 @@ export const addSweetController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error creating sweet' });
   }
 };
+
+export const viewSweetsController = async (req: Request, res: Response) => {
+  try {
+    const sweets = await SweetModel.find({});
+    res.status(200).send(sweets);
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching sweets' });
+  }
+};
