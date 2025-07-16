@@ -29,6 +29,26 @@ describe('POST /add', () => {
     expect(sweetFromDb).not.toBeNull();
     expect(sweetFromDb?.name).toBe(newSweet.name);
   });
+
+  it('should return 400 if required fields are missing', async () => {
+    const response = await request(app)
+      .post('/add')
+      .send({ name: 'Incomplete' });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Missing required fields');
+  });
+
+  it('should return 400 if a sweet with the same name exists', async () => {
+    // Arrange: create an initial sweet
+    const sweet = { name: 'Duplicate Sweet', category: 'Test', price: 10, quantity: 10 };
+    await SweetModel.create(sweet);
+
+    // Act & Assert: try to create it again
+    const response = await request(app).post('/add').send(sweet);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('A sweet with this name already exists');
+  });
 });
 
 

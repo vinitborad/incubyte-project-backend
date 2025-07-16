@@ -3,8 +3,22 @@ import { SweetModel } from '../models/sweet.model';
 
 export const addSweetController = async (req: Request, res: Response) => {
   try {
-    // Use the model to create a sweet with the request body
-    const newSweet = await SweetModel.create(req.body);
+    const { name, category, price, quantity } = req.body;
+
+    if (!name || !category || price === undefined || quantity === undefined) {
+      return res.status(400).send({ message: 'Missing required fields' });
+    }
+
+    if (price <= 0 || quantity < 0) {
+      return res.status(400).send({ message: 'Price and quantity must be positive numbers' });
+    }
+
+    const existingSweet = await SweetModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+    if (existingSweet) {
+      return res.status(400).send({ message: 'A sweet with this name already exists' });
+    }
+
+    const newSweet = await SweetModel.create({ name, category, price, quantity });
     res.status(201).send(newSweet);
   } catch (error) {
     res.status(500).send({ message: 'Error creating sweet' });
