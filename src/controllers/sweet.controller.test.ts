@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
   addSweetController,
   deleteSweetController,
+  purchaseSweetController,
   searchSweetsController,
   viewSweetsController
 } from './sweet.controller';
@@ -260,5 +261,89 @@ describe('searchSweetsController', () => {
 
     // Assert
     expect(SweetModel.find).toHaveBeenCalledWith({ price: { $gte: 50 } });
+  });
+});
+
+
+describe('purchaseSweetController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should decrease quantity and return 200 on a valid purchase', async () => {
+    // Arrange
+    const mockSweet = {
+      _id: 'some-id',
+      quantity: 50,
+      save: jest.fn().mockResolvedValue(true), // Mock the save method
+    };
+    (SweetModel.findById as jest.Mock).mockResolvedValue(mockSweet);
+
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 10 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await purchaseSweetController(req, res);
+
+    // Assert
+    expect(SweetModel.findById).toHaveBeenCalledWith('some-id');
+    expect(mockSweet.save).toHaveBeenCalled();
+    expect(mockSweet.quantity).toBe(40); // 50 - 10
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should return 400 if purchase quantity is missing or zero', async () => {
+    // Arrange
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 0 }, // Invalid quantity
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await purchaseSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive purchase quantity is required' });
+  });
+
+  it('should return 400 if stock is insufficient', async () => {
+    // Arrange
+    const mockSweet = { quantity: 5, save: jest.fn() };
+    (SweetModel.findById as jest.Mock).mockResolvedValue(mockSweet);
+
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 10 }, // Trying to buy more than in stock
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await purchaseSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Insufficient stock' });
+  });
+
+  it('should return 404 if sweet is not found', async () => {
+    // Arrange
+    (SweetModel.findById as jest.Mock).mockResolvedValue(null);
+    const req = {
+      params: { id: 'not-found-id' },
+      body: { quantity: 1 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    // Act
+    await purchaseSweetController(req, res);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
   });
 });

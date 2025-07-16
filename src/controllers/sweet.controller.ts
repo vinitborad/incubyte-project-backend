@@ -89,6 +89,11 @@ export const purchaseSweetController = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { quantity: purchaseQuantity } = req.body;
 
+    // 1. New Validation: Check if quantity is provided and is a positive number
+    if (!purchaseQuantity || purchaseQuantity <= 0) {
+      return res.status(400).send({ message: 'A positive purchase quantity is required' });
+    }
+
     const sweet = await SweetModel.findById(id);
 
     if (!sweet) {
@@ -102,7 +107,7 @@ export const purchaseSweetController = async (req: Request, res: Response) => {
     sweet.quantity -= purchaseQuantity;
     await sweet.save();
 
-    res.status(200).send({ message: 'Purchase successful' });
+    res.status(200).send({ message: 'Purchase successful', sweet });
   } catch (error) {
     res.status(500).send({ message: 'Error processing purchase' });
   }
