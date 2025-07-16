@@ -93,3 +93,26 @@ export const purchaseSweetController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error processing purchase' });
   }
 };
+
+
+export const restockSweetController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { quantity: restockQuantity } = req.body;
+
+    // Find the sweet and atomically increment its quantity
+    const updatedSweet = await SweetModel.findByIdAndUpdate(
+      id,
+      { $inc: { quantity: restockQuantity } },
+      { new: true },
+    );
+
+    if (!updatedSweet) {
+      return res.status(404).send({ message: 'Sweet not found' });
+    }
+
+    res.status(200).send({ message: 'Restock successful' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error processing restock' });
+  }
+};

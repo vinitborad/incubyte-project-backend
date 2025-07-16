@@ -5,6 +5,7 @@ import {
   deleteSweetController,
   searchSweetsController,
   purchaseSweetController,
+  restockSweetController,
 } from '../controllers/sweet.controller';
 
 const router = Router();
@@ -14,5 +15,6 @@ router.get('/view', viewSweetsController);
 router.delete('/delete/:id', deleteSweetController);
 router.get('/search', searchSweetsController);
 router.post('/purchase/:id', purchaseSweetController);
+router.post('/restock/:id', restockSweetController);
 
 export default router;
