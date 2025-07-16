@@ -60,7 +60,7 @@ describe('GET /view', () => {
     await SweetModel.create([sweet1, sweet2]);
 
     // Act: Make the API call
-    const response = await request(app).get('/view').expect(200);
+    const response = await request(app).get('/view-all').expect(200);
 
     // Assert: Check the response body
     expect(response.body).toBeInstanceOf(Array);
