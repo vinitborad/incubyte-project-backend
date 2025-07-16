@@ -158,4 +158,28 @@ describe('POST /purchase/:id', () => {
     const updatedSweet = await SweetModel.findById(sweetId);
     expect(updatedSweet?.quantity).toBe(90); // 100 - 10
   });
+
+  it('should return a 400 error if the purchase quantity exceeds the stock', async () => {
+    // Arrange: Create a sweet with a low quantity
+    const sweet = await SweetModel.create({
+      name: 'Petha',
+      category: 'Fruit-Based',
+      price: 20,
+      quantity: 5, // Only 5 in stock
+    });
+    const sweetId = sweet._id.toString();
+    const purchaseQuantity = 10; // Trying to buy 10
+
+    // Act & Assert
+    const response = await request(app)
+      .post(`/purchase/${sweetId}`)
+      .send({ quantity: purchaseQuantity })
+      .expect(400); // Expecting a "Bad Request" status
+
+    expect(response.body.message).toBe('Insufficient stock');
+
+    // Also assert that the quantity in the database did NOT change
+    const sweetFromDb = await SweetModel.findById(sweetId);
+    expect(sweetFromDb?.quantity).toBe(5);
+  });
 });
