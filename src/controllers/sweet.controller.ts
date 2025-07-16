@@ -34,3 +34,20 @@ export const deleteSweetController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error deleting sweet' });
   }
 };
+
+export const searchSweetsController = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+    const filter: { [key: string]: any } = {};
+
+    if (name) {
+      // Create a case-insensitive regex for partial matching
+      filter.name = { $regex: name, $options: 'i' };
+    }
+
+    const sweets = await SweetModel.find(filter);
+    res.status(200).send(sweets);
+  } catch (error) {
+    res.status(500).send({ message: 'Error searching sweets' });
+  }
+};
