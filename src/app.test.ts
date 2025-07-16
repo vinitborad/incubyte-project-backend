@@ -48,3 +48,23 @@ describe('GET /view', () => {
     expect(response.body[1].name).toBe('Gajar Halwa');
   });
 });
+
+describe('DELETE /delete/:id', () => {
+  it('should delete a sweet from the database', async () => {
+    // Arrange: Create a sweet to delete
+    const sweet = await SweetModel.create({
+      name: 'Rasmalai',
+      category: 'Milk-Based',
+      price: 40,
+      quantity: 25,
+    });
+    const sweetId = sweet._id.toString();
+
+    // Act: Make the API call to delete the sweet
+    await request(app).delete(`/delete/${sweetId}`).expect(200);
+
+    // Assert: Check that the sweet is no longer in the database
+    const sweetFromDb = await SweetModel.findById(sweetId);
+    expect(sweetFromDb).toBeNull();
+  });
+});
