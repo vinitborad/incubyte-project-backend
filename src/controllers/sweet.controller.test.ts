@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { addSweetController, deleteSweetController, viewSweetsController } from './sweet.controller';
+import {
+  addSweetController,
+  deleteSweetController,
+  searchSweetsController,
+  viewSweetsController
+} from './sweet.controller';
 import { SweetModel } from '../models/sweet.model';
 
 // Mock the entire SweetModel module
@@ -189,5 +194,71 @@ describe('deleteSweetController', () => {
     // Assert
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({ message: 'Error deleting sweet' });
+  });
+});
+
+
+describe('searchSweetsController', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call SweetModel.find with an empty filter if no query params are provided', async () => {
+    // Arrange
+    const req = { query: {} } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    // Act
+    await searchSweetsController(req, res);
+
+    // Assert
+    expect(SweetModel.find).toHaveBeenCalledWith({});
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should build a filter for name, category, and price range correctly', async () => {
+    // Arrange
+    const req = {
+      query: {
+        name: 'Cake',
+        category: 'Pastry',
+        minPrice: '100',
+        maxPrice: '500',
+      },
+    } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    // Act
+    await searchSweetsController(req, res);
+
+    // Assert: Check that the filter object was constructed correctly
+    const expectedFilter = {
+      name: { $regex: 'Cake', $options: 'i' },
+      category: 'Pastry',
+      price: { $gte: 100, $lte: 500 },
+    };
+    expect(SweetModel.find).toHaveBeenCalledWith(expectedFilter);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should only build a filter for minPrice if maxPrice is not provided', async () => {
+    // Arrange
+    const req = { query: { minPrice: '50' } } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    // Act
+    await searchSweetsController(req, res);
+
+    // Assert
+    expect(SweetModel.find).toHaveBeenCalledWith({ price: { $gte: 50 } });
   });
 });
