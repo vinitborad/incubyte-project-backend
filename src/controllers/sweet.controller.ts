@@ -37,20 +37,29 @@ export const deleteSweetController = async (req: Request, res: Response) => {
 
 export const searchSweetsController = async (req: Request, res: Response) => {
   try {
-    // Destructure category from the query as well
-    const { name, category } = req.query;
+    const { name, category, minPrice, maxPrice } = req.query;
     const filter: { [key: string]: any } = {};
 
     if (name) {
       filter.name = { $regex: name as string, $options: 'i' };
     }
 
-    // Add a new condition to handle the category filter
     if (category) {
       filter.category = category;
     }
 
-    const sweets = await SweetModel.find(filter);
+    // Add logic for price range
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice); // $gte for "greater than or equal to"
+      }
+      if (maxPrice) {
+        filter.price.$lte = Number(maxPrice); // $lte for "less than or equal to"
+      }
+    }
+
+    const sweets = await SweetModel.find(filter).sort({ price: 1 });
     res.status(200).send(sweets);
   } catch (error) {
     res.status(500).send({ message: 'Error searching sweets' });

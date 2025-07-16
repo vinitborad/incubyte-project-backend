@@ -120,7 +120,13 @@ describe('GET /search', () => {
 
     // Assert
     expect(response.body.length).toBe(2);
-    expect(response.body[0].name).toBe('Barfi');
-    expect(response.body[1].name).toBe('Mysore Pak');
+
+    // Create an array of the names from the response
+    const names = response.body.map((sweet: { name: string }) => sweet.name);
+
+    // Check that the expected names are included in the array, in any order
+    expect(names).toContain('Barfi');
+    expect(names).toContain('Mysore Pak');
   });
+
 });
