@@ -37,12 +37,17 @@ export const deleteSweetController = async (req: Request, res: Response) => {
 
 export const searchSweetsController = async (req: Request, res: Response) => {
   try {
-    const { name } = req.query;
+    // Destructure category from the query as well
+    const { name, category } = req.query;
     const filter: { [key: string]: any } = {};
 
     if (name) {
-      // Create a case-insensitive regex for partial matching
-      filter.name = { $regex: name, $options: 'i' };
+      filter.name = { $regex: name as string, $options: 'i' };
+    }
+
+    // Add a new condition to handle the category filter
+    if (category) {
+      filter.category = category;
     }
 
     const sweets = await SweetModel.find(filter);
