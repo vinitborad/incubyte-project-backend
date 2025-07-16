@@ -19,3 +19,18 @@ export const viewSweetsController = async (req: Request, res: Response) => {
     res.status(500).send({ message: 'Error fetching sweets' });
   }
 };
+
+export const deleteSweetController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deletedSweet = await SweetModel.findByIdAndDelete(id);
+
+    if (!deletedSweet) {
+      return res.status(404).send({ message: 'Sweet not found' });
+    }
+
+    res.status(200).send({ message: 'Sweet deleted successfully' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error deleting sweet' });
+  }
+};
