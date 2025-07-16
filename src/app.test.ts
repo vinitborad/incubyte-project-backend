@@ -30,3 +30,21 @@ describe('POST /add', () => {
     expect(sweetFromDb?.name).toBe(newSweet.name);
   });
 });
+
+describe('GET /view', () => {
+  it('should return an array of all sweets in the database', async () => {
+    // Arrange: Create some sweets in the test database first
+    const sweet1 = { name: 'Kaju Katli', category: 'Nut-Based', price: 50, quantity: 20 };
+    const sweet2 = { name: 'Gajar Halwa', category: 'Vegetable-Based', price: 30, quantity: 15 };
+    await SweetModel.create([sweet1, sweet2]);
+
+    // Act: Make the API call
+    const response = await request(app).get('/view').expect(200);
+
+    // Assert: Check the response body
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBe(2);
+    expect(response.body[0].name).toBe('Kaju Katli');
+    expect(response.body[1].name).toBe('Gajar Halwa');
+  });
+});
