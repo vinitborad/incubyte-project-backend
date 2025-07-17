@@ -1,0 +1,39 @@
+name: Backend Continuous Integration
+
+on:
+  # The 'push' event trigger for every push to any branch.
+  push:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checks out your repository's code so the workflow can access it.
+      - name: 1. Checkout Repository Code
+        uses: actions/checkout@v4
+
+      # Step 2: Sets up the pnpm package manager.
+      - name: 2. Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # Step 3: Sets up the Node.js environment.
+      - name: 3. Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      # Step 4: Installs all project dependencies.
+      - name: 4. Install Dependencies
+        run: pnpm install
+
+      # Step 5: Compiles the TypeScript code into JavaScript.
+      - name: 5. Build Project
+        run: pnpm build
+
+      # Step 6: Executes the entire Jest test suite.
+      - name: 6. Run Tests
+        run: pnpm test --ci
