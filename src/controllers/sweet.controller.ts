@@ -5,8 +5,15 @@ export const addSweetController = async (req: Request, res: Response) => {
   try {
     const { name, category, price, quantity } = req.body;
 
-    if (!name || !category || price === undefined || quantity === undefined) {
+    // Enhanced validation for empty strings and data types
+    if (!name || !category || price === undefined || quantity === undefined ||
+      name.trim() === '' || category.trim() === '') {
       return res.status(400).send({ message: 'Missing required fields' });
+    }
+
+    // Check if price and quantity are numbers
+    if (typeof price !== 'number' || typeof quantity !== 'number' || isNaN(price) || isNaN(quantity)) {
+      return res.status(400).send({ message: 'Price and quantity must be valid numbers' });
     }
 
     if (price <= 0 || quantity < 0) {
@@ -65,14 +72,24 @@ export const searchSweetsController = async (req: Request, res: Response) => {
       filter.category = category;
     }
 
-    // Add logic for price range
+    // Add logic for price range with better error handling
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) {
-        filter.price.$gte = Number(minPrice); // $gte for "greater than or equal to"
+        const minPriceNum = Number(minPrice);
+        if (!isNaN(minPriceNum)) {
+          filter.price.$gte = minPriceNum; // $gte for "greater than or equal to"
+        }
       }
       if (maxPrice) {
-        filter.price.$lte = Number(maxPrice); // $lte for "less than or equal to"
+        const maxPriceNum = Number(maxPrice);
+        if (!isNaN(maxPriceNum)) {
+          filter.price.$lte = maxPriceNum; // $lte for "less than or equal to"
+        }
+      }
+      // If no valid price filters were added, remove the price filter
+      if (Object.keys(filter.price).length === 0) {
+        delete filter.price;
       }
     }
 

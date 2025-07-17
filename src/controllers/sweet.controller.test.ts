@@ -80,6 +80,104 @@ describe('addSweetController', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ message: 'A sweet with this name already exists' });
   });
+
+  // Edge case: empty string name
+  it('should return 400 if name is empty string', async () => {
+    const req = {
+      body: { name: '', category: 'Test', price: 10, quantity: 20 },
+    } as Request;
+    const res = getMockRes();
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Missing required fields' });
+  });
+
+  // Edge case: empty string category
+  it('should return 400 if category is empty string', async () => {
+    const req = {
+      body: { name: 'Test Sweet', category: '', price: 10, quantity: 20 },
+    } as Request;
+    const res = getMockRes();
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Missing required fields' });
+  });
+
+  // Edge case: zero price
+  it('should return 400 if price is zero', async () => {
+    const req = {
+      body: { name: 'Zero Price Sweet', category: 'Test', price: 0, quantity: 20 },
+    } as Request;
+    const res = getMockRes();
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Price and quantity must be positive numbers' });
+  });
+
+  // Edge case: negative quantity
+  it('should return 400 if quantity is negative', async () => {
+    const req = {
+      body: { name: 'Negative Quantity Sweet', category: 'Test', price: 10, quantity: -5 },
+    } as Request;
+    const res = getMockRes();
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Price and quantity must be positive numbers' });
+  });
+
+  // Edge case: zero quantity should be allowed
+  it('should allow zero quantity', async () => {
+    const req = {
+      body: { name: 'Zero Stock Sweet', category: 'Test', price: 10, quantity: 0 },
+    } as Request;
+    const res = getMockRes();
+
+    (SweetModel.findOne as jest.Mock).mockResolvedValue(null);
+
+    await addSweetController(req, res);
+
+    expect(SweetModel.create).toHaveBeenCalledWith(req.body);
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  // Edge case: database error on create
+  it('should return 500 if database create fails', async () => {
+    const req = {
+      body: { name: 'Test Sweet', category: 'Test', price: 10, quantity: 20 },
+    } as Request;
+    const res = getMockRes();
+
+    (SweetModel.findOne as jest.Mock).mockResolvedValue(null);
+    (SweetModel.create as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error creating sweet' });
+  });
+
+  // Edge case: database error on findOne
+  it('should return 500 if database findOne fails', async () => {
+    const req = {
+      body: { name: 'Test Sweet', category: 'Test', price: 10, quantity: 20 },
+    } as Request;
+    const res = getMockRes();
+
+    (SweetModel.findOne as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    await addSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error creating sweet' });
+  });
 });
 
 
@@ -264,6 +362,65 @@ describe('searchSweetsController', () => {
     // Assert
     expect(SweetModel.find).toHaveBeenCalledWith({ price: { $gte: 50 } });
   });
+
+  // Edge case: only maxPrice provided
+  it('should only build a filter for maxPrice if minPrice is not provided', async () => {
+    const req = { query: { maxPrice: '100' } } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await searchSweetsController(req, res);
+
+    expect(SweetModel.find).toHaveBeenCalledWith({ price: { $lte: 100 } });
+  });
+
+  // Edge case: database error
+  it('should return 500 if database operation fails', async () => {
+    const req = { query: {} } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockRejectedValue(new Error('Database error')),
+    });
+
+    await searchSweetsController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error searching sweets' });
+  });
+
+  // Edge case: invalid price values
+  it('should handle invalid price values by ignoring them', async () => {
+    const req = {
+      query: { minPrice: 'invalid', maxPrice: 'alsoInvalid' },
+    } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await searchSweetsController(req, res);
+
+    // Invalid prices should be ignored, so filter should be empty
+    expect(SweetModel.find).toHaveBeenCalledWith({});
+  });
+
+  // Edge case: empty string values
+  it('should handle empty string values properly', async () => {
+    const req = {
+      query: { name: '', category: '', minPrice: '', maxPrice: '' },
+    } as unknown as Request;
+    const res = getMockRes();
+    (SweetModel.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await searchSweetsController(req, res);
+
+    // Empty strings are falsy, so they shouldn't be included in filter
+    expect(SweetModel.find).toHaveBeenCalledWith({});
+  });
 });
 
 
@@ -348,6 +505,69 @@ describe('purchaseSweetController', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
   });
+
+  // Edge case: negative quantity
+  it('should return 400 for negative purchase quantity', async () => {
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: -5 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await purchaseSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive purchase quantity is required' });
+  });
+
+  // Edge case: undefined quantity
+  it('should return 400 for undefined quantity', async () => {
+    const req = {
+      params: { id: 'some-id' },
+      body: {},
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await purchaseSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive purchase quantity is required' });
+  });
+
+  // Edge case: database error on findById
+  it('should return 500 if database findById fails', async () => {
+    (SweetModel.findById as jest.Mock).mockRejectedValue(new Error('Database error'));
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 5 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await purchaseSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error processing purchase' });
+  });
+
+  // Edge case: database error on save
+  it('should return 500 if database save fails', async () => {
+    const mockSweet = {
+      quantity: 50,
+      save: jest.fn().mockRejectedValue(new Error('Save failed')),
+    };
+    (SweetModel.findById as jest.Mock).mockResolvedValue(mockSweet);
+
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 10 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await purchaseSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error processing purchase' });
+  });
 });
 
 
@@ -409,6 +629,49 @@ describe('restockSweetController', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({ message: 'Sweet not found' });
   });
+
+  // Edge case: zero quantity
+  it('should return 400 for zero restock quantity', async () => {
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 0 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await restockSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive restock quantity is required' });
+  });
+
+  // Edge case: undefined quantity
+  it('should return 400 for undefined quantity', async () => {
+    const req = {
+      params: { id: 'some-id' },
+      body: {},
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await restockSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: 'A positive restock quantity is required' });
+  });
+
+  // Edge case: database error
+  it('should return 500 if database operation fails', async () => {
+    (SweetModel.findByIdAndUpdate as jest.Mock).mockRejectedValue(new Error('Database error'));
+    const req = {
+      params: { id: 'some-id' },
+      body: { quantity: 10 },
+    } as unknown as Request;
+    const res = getMockRes();
+
+    await restockSweetController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error processing restock' });
+  });
 });
 
 
@@ -432,5 +695,32 @@ describe('getCategoriesController', () => {
     expect(SweetModel.distinct).toHaveBeenCalledWith('category');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith(mockCategories);
+  });
+
+  // Edge case: empty categories
+  it('should return empty array when no categories exist', async () => {
+    (SweetModel.distinct as jest.Mock).mockResolvedValue([]);
+
+    const req = {} as Request;
+    const res = getMockRes();
+
+    await getCategoriesController(req, res);
+
+    expect(SweetModel.distinct).toHaveBeenCalledWith('category');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith([]);
+  });
+
+  // Edge case: database error
+  it('should return 500 if database operation fails', async () => {
+    (SweetModel.distinct as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+    const req = {} as Request;
+    const res = getMockRes();
+
+    await getCategoriesController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ message: 'Error fetching categories' });
   });
 });
