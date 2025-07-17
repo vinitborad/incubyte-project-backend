@@ -3,11 +3,11 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=internet-explorer)](https://incubyte.vinitborad.com)
-[![Test Coverage](https://img.shields.io/badge/Coverage-80%25-success?style=for-the-badge&logo=jest)](#test-coverage)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](#tech-stack)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#deployment)
-[![AI](https://img.shields.io/badge/AI-LangGraph-purple?style=for-the-badge&logo=openai&logoColor=white)](#tech-stack)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agent-orange?style=for-the-badge&logo=python&logoColor=white)](#tech-stack)
+[![Test Coverage](https://img.shields.io/badge/Coverage-80%25-success?style=for-the-badge&logo=jest)](#-test-coverage)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](#-crafting-tools)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-deployment)
+[![AI](https://img.shields.io/badge/AI-LangGraph-purple?style=for-the-badge&logo=openai&logoColor=white)](#-crafting-tools)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent-orange?style=for-the-badge&logo=python&logoColor=white)](#-crafting-tools)
 
 **🎯 Checkout my craft at: [https://incubyte.vinitborad.com](https://incubyte.vinitborad.com)**
 
