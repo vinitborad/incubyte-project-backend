@@ -36,4 +36,4 @@ jobs:
 
       # Step 6: Executes the entire Jest test suite.
       - name: 6. Run Tests
-        run: pnpm test --ci
+        run: pnpm test
