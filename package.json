@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ts-node src/server.ts",
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "check-env": "ts-node src/check-env.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "mongoose": "^8.16.3"
   }
