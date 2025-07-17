@@ -17,7 +17,7 @@
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#-crafting-tools)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](#-crafting-tools)
 
-**🎯 Checkout my craft at: [https://incubyte.vinitborad.com](https://incubyte.vinitborad.com)**
+### 🎯 Checkout my craft at: [https://incubyte.vinitborad.com](https://incubyte.vinitborad.com)
 
 With this kata I would love to show you my startups: **[www.patrikaprinters.com](https://www.patrikaprinters.com)** (printed 2lakh+ pages of customers), **[www.hajripatrak.com](https://www.hajripatrak.com)** (Comprehensive QR attendance system for colleges/universities), **[www.apnipg.com](https://www.apnipg.com)** (Generated up to ₹1.25 lakhs of revenue, PG brokering Platform).
 
@@ -44,6 +44,22 @@ Crafted using TypeScript, Express, Python, FastAPI, Jest and Pytest for TDD, Lan
 - **AI/ML**: LangChain, LangGraph, OpenAI APIs
 - **DevOps**: Docker, Containerization
 - **Deployment**: VPS (DigitalOcean), GitHub Workflows for Test Checking
+- **Package Manager**: pnpm
+---
+- **AI Framework**: LangChain, LangGraph for agent orchestration
+- **Language Model**: OpenAI GPT-4 for natural language understanding
+- **Backend**: FastAPI, Python 3.11
+- **Memory**: Redis for chat history and session management
+- **Database**: MongoDB integration for sweet inventory access
+- **Testing**: Pytest with comprehensive test coverage
+- **Package Manager**: pip with requirements.txt
+---
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: TailwindCSS v4, Radix UI components
+- **State Management**: Zustand for global state, React Query for server state
+- **Forms**: React Hook Form with Zod validation
+- **UI Components**: Custom components built with Radix UI primitives
+- **Icons**: Lucide React icons
 - **Package Manager**: pnpm
 
 ## 📊 Test Coverage
