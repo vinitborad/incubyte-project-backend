@@ -1,0 +1,25 @@
+# Git and Node specific
+.git
+.gitignore
+node_modules
+dist
+.tsbuildinfo
+
+# Environment files (these will be provided by Coolify)
+.env
+.env.example
+.env.*
+
+# Docker specific
+Dockerfile
+
+# Logs and temp files
+logs
+*.log
+tmp
+temp
+
+# Editor and OS specific
+.vscode/
+.idea/
+.DS_Store
