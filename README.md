@@ -19,7 +19,7 @@
 
 ### 🎯 Checkout my craft at: [https://incubyte.vinitborad.com](https://incubyte.vinitborad.com)
 
-### With this kata I would love to show you my startups: **[www.patrikaprinters.com](https://www.patrikaprinters.com)** (printed 2lakh+ pages of customers), **[www.hajripatrak.com](https://www.hajripatrak.com)** (Comprehensive QR attendance system for colleges/universities), **[www.apnipg.com](https://www.apnipg.com)** (Generated up to ₹1.25 lakhs of revenue, PG brokering Platform).
+### With this kata I would love to show you tech solution provided by me for at: **[www.patrikaprinters.com](https://www.patrikaprinters.com)**, **[www.hajripatrak.com](https://www.hajripatrak.com)**, **[www.apnipg.com](https://www.apnipg.com)**.
 
 </div>
 
